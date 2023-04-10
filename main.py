@@ -77,7 +77,7 @@ def draw_player():
 
 def check_position(i_x, i_y):
     turns = [False, False, False, False]
-    print(i_x, i_y, sep=' ')
+    # print(i_x, i_y, sep=' ')
     if level[i_y][i_x + 1] < 3:
         turns[0] = True
     if level[i_y][i_x - 1] < 3:
@@ -86,7 +86,7 @@ def check_position(i_x, i_y):
         turns[2] = True
     if level[i_y + 1][i_x] < 3:
         turns[3] = True
-    print(*turns)
+    # print(*turns)
     return turns
 
 running = True
