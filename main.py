@@ -11,8 +11,7 @@ WIDTH = 800
 HEIGHT = 850
 square_x = (WIDTH // 30)
 square_y = ((HEIGHT - 50) // 32)
-level = boards # boards[??]
-
+level = boards  # boards[??]
 
 # specifications 2
 screen = pg.display.set_mode([WIDTH, HEIGHT])
@@ -22,15 +21,16 @@ timer = pg.time.Clock()
 fps = 60
 font = pg.font.Font('freesansbold.ttf', 20)
 
-
 # Player, надо создать класс
 player_images = []
-player_i_x, player_i_y =  15, 24
-player_x, player_y = player_i_x * square_x, player_i_y * square_y # переписать в класс Player
+player_i_x, player_i_y = 15, 24
+player_x, player_y = player_i_x * square_x, player_i_y * square_y  # переписать в класс Player
 direction = 0
 counter = 0
+c = 0 # controls movement of pacman
 speed = 5
-turns_allowed = [False, False, False, False] # R, L, U, D
+movement = False
+turns_allowed = [False, False, False, False]  # R, L, U, D
 for i in range(1, 5):
     player_images.append(pg.transform.scale(pg.image.load(f'objects/player_images/{i}.xcf'), (30, 30)))
 
@@ -75,9 +75,16 @@ def draw_player():
         case 3:  # Down
             screen.blit(pg.transform.rotate(player_images[counter // 5], -90), (player_x, player_y))
 
+
 def check_position(i_x, i_y):
     turns = [False, False, False, False]
-    # print(i_x, i_y, sep=' ')
+    print(i_x, i_y, sep=' ')
+    if i_x == 29 and i_y == 15:
+        turns[0] = True
+        return 1, 15, turns
+    if i_x == 0 and i_y == 15:
+        turns[1] = True
+        return 28, 15, turns
     if level[i_y][i_x + 1] < 3:
         turns[0] = True
     if level[i_y][i_x - 1] < 3:
@@ -87,7 +94,28 @@ def check_position(i_x, i_y):
     if level[i_y + 1][i_x] < 3:
         turns[3] = True
     # print(*turns)
-    return turns
+    return i_x, i_y, turns
+
+
+def move(d, i_x, i_y, f, turns):
+    if c != 0:
+        return i_x, i_y
+    if not f:
+        return i_x, i_y
+    match d:
+        case 0:
+            if turns[0]:
+                i_x += 1
+        case 1:
+            if turns[1]:
+                i_x -= 1
+        case 2:
+            if turns[2]:
+                i_y -= 1
+        case 3:
+            if turns[3]:
+                i_y += 1
+    return i_x, i_y
 
 running = True
 while running:
@@ -100,26 +128,35 @@ while running:
     '''center_x = player_x + 15
     center_y = player_y + 15
     # pg.draw.circle(screen, 'black', (center_x, center_y), 2)'''
-    turns_allowed = check_position(player_i_x, player_i_y)
+    player_i_x, player_i_y, turns_allowed = check_position(player_i_x, player_i_y)
+    player_i_x, player_i_y = move(direction, player_i_x, player_i_y, movement, turns_allowed)
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
         if event.type == pg.KEYDOWN:
             if (event.key == pg.K_RIGHT or event.key == pg.K_d) and turns_allowed[0]:
                 direction = 0
-                player_i_x += 1
+                movement = True
+                # player_i_x += 1
             if (event.key == pg.K_LEFT or event.key == pg.K_a) and turns_allowed[1]:
                 direction = 1
-                player_i_x -= 1
+                movement = True
+                # player_i_x -= 1
             if (event.key == pg.K_UP or event.key == pg.K_w) and turns_allowed[2]:
                 direction = 2
-                player_i_y -= 1
+                movement = True
+                # player_i_y -= 1
             if (event.key == pg.K_DOWN or event.key == pg.K_s) and turns_allowed[3]:
                 direction = 3
-                player_i_y += 1
+                movement = True
+                # player_i_y += 1
     pg.display.flip()
     if counter < 19:
         counter += 1
     else:
         counter = 0
+    if c < 7:
+        c += 1
+    else:
+        c = 0
 pg.quit()
