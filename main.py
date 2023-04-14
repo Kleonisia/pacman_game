@@ -29,8 +29,9 @@ player_i_x, player_i_y = 15, 24
 player_x, player_y = player_i_x * square_x, player_i_y * square_y  # переписать в класс Player
 direction = 0
 counter = 0
-c = 0  # controls movement of pacman
-speed = 5
+timer_pacman = 0  # controls movement of pacman
+timer_ghost = 0 # controls movement of ghosts
+pacman_speed = 5
 lives = 3
 movement = False
 turns_allowed = [False, False, False, False]  # R, L, U, D
@@ -50,10 +51,437 @@ class Ghost:
         self.id = id
         self.target = target
         self.draw()
+        self.i_x, self.i_y, self.turns = self.check_pos()
     def draw(self):
         screen.blit(self.img, (self.i_x * square_x, self.i_y * square_y))
+    def move(self):
+        if timer_ghost != 0:
+            return
+        self.target = (player_i_x, player_i_y)
+        print(f'Player: {player_i_x} {player_i_y}')
+        self.i_x, self.i_y, self.turns = self.check_pos()
+        if self.target[0] > self.i_x and self.target[1] < self.i_y: # 1
+            # print('1')
+            if self.direction == 0:
+                if self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+            elif self.direction == 2:
+                if self.turns[2]:
+                    self.i_y -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            elif self.direction == 3:
+                if self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[3]:
+                    self.i_y += 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            else:
+                if self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+        elif self.target[0] < self.i_x and self.target[1] < self.i_y: # 2
+            # print('2')
+            if self.direction == 1:
+                if self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+            elif self.direction == 2:
+                if self.turns[2]:
+                    self.i_y -= 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            elif self.direction == 3:
+                if self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            else:
+                if self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+        elif self.target[0] < self.i_x and self.target[1] > self.i_y: # 3
+            # print('3')
+            if self.direction == 1:
+                if self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+            elif self.direction == 3:
+                if self.turns[3]:
+                    self.i_y += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            elif self.direction == 2:
+                if self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.i_y -= 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            else:
+                if self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+        elif self.target[0] > self.i_x and self.target[1] > self.i_y: # 4
+            # print('4')
+            if self.direction == 0:
+                if self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+            elif self.direction == 3:
+                if self.turns[3]:
+                    self.i_y += 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            elif self.direction == 2:
+                if self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.i_y -= 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            else:
+                if self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+        elif self.target[0] == self.i_x and self.target[1] > self.i_y:
+            if self.direction == 3:
+                if self.turns[3]:
+                    self.i_y += 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            elif self.direction == 1:
+                if self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+            elif self.direction == 0:
+                if self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+            else:
+                if self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.i_y -= 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+        elif self.target[0] == self.i_x and self.target[1] < self.i_y:
+            if self.direction == 2:
+                if self.turns[2]:
+                    self.i_y -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            elif self.direction == 1:
+                if self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+            elif self.direction == 0:
+                if self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+            else:
+                if self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.i_y += 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+        elif self.target[1] == self.i_y and self.target[0] > self.i_x:
+            if self.direction == 0:
+                if self.turns[0]:
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+            elif self.direction == 3:
+                if self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[3]:
+                    self.i_y += 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            elif self.direction == 2:
+                if self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                elif self.turns[2]:
+                    self.i_y -= 1
+                elif self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            else:
+                if self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[1]:
+                    self.i_x -= 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+        elif self.target[1] == self.i_y and self.target[0] < self.i_x:
+            if self.direction == 1:
+                if self.turns[1]:
+                    self.i_x -= 1
+                elif self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                else:
+                    self.direction = 0
+                    self.i_x += 1
+            elif self.direction == 2:
+                if self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[2]:
+                    self.i_y -= 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                else:
+                    self.direction = 3
+                    self.i_y += 1
+            elif self.direction == 3:
+                if self.turns[1]:
+                    self.direction = 1
+                    self.i_x -= 1
+                elif self.turns[3]:
+                    self.i_y += 1
+                elif self.turns[0]:
+                    self.direction = 0
+                    self.i_x += 1
+                else:
+                    self.direction = 2
+                    self.i_y -= 1
+            else:
+                if self.turns[2]:
+                    self.direction = 2
+                    self.i_y -= 1
+                elif self.turns[3]:
+                    self.direction = 3
+                    self.i_y += 1
+                elif self.turns[0]:
+                    self.i_x += 1
+                else:
+                    self.direction = 1
+                    self.i_x -= 1
+        else:
+            pass
+    def check_pos(self):
+        turns = [False, False, False, False]
+        print(f'blinky: {self.i_x} {self.i_y}')
+        if self.i_x == 29 and self.i_y == 15:
+            turns[0] = True
+            return 1, 15, turns
+        if self.i_x == 0 and self.i_y == 15:
+            turns[1] = True
+            return 28, 15, turns
+        if level[self.i_y][self.i_x + 1] < 3:
+            turns[0] = True
+        if level[self.i_y][self.i_x - 1] < 3:
+            turns[1] = True
+        if level[self.i_y - 1][self.i_x] < 3:
+            turns[2] = True
+        if level[self.i_y + 1][self.i_x] < 3:
+            turns[3] = True
+        print(*turns)
+        return self.i_x, self.i_y, turns
 
-ghost_speed = 3
+
+# const Ghosts
+ghost_speed = 9
 blinky_i_x, blinky_i_y = 14, 12
 pinky_i_x, pinky_i_y = 14, 15
 inky_i_x, inky_i_y = 12, 15
@@ -64,7 +492,8 @@ inky_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/inky.xcf'), 
 clyde_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/clyde.xcf'), (30, 30))
 spooked_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/powerup.xcf'), (30, 30))
 dead_ghost_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/dead.png'), (30, 30))
-target = [(player_x, player_y), (player_x, player_y), (player_x, player_y), (player_x, player_y)]
+target = [(player_i_x, player_i_y), (player_i_x, player_i_y), (player_i_x, player_i_y), (player_i_x, player_i_y)]
+
 
 blinky = Ghost(blinky_i_x, blinky_i_y, ghost_speed, blinky_img, 0, False, 0, target[0])
 pinky = Ghost(pinky_i_x, pinky_i_y, ghost_speed, pinky_img, 2, False, 0, target[1])
@@ -134,7 +563,7 @@ def check_position(i_x, i_y):
 
 
 def move(d, i_x, i_y, f, turns):
-    if c != 0:
+    if timer_pacman != 0:
         return i_x, i_y
     if not f:
         return i_x, i_y
@@ -184,6 +613,7 @@ def draw_misc():
 running = True
 while running:
     player_x, player_y = player_i_x * square_x, player_i_y * square_y
+    blinky.target = (player_i_x, player_i_y)
     # print(counter)
     timer.tick(fps)
     if powerup and power_counter < 600:
@@ -206,6 +636,7 @@ while running:
     pinky.draw()
     inky.draw()
     clyde.draw()
+    blinky.move()
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
@@ -231,8 +662,12 @@ while running:
         counter += 1
     else:
         counter = 0
-    if c < 9:
-        c += 1
+    if timer_pacman < pacman_speed:
+        timer_pacman += 1
     else:
-        c = 0
+        timer_pacman = 0
+    if timer_ghost < ghost_speed:
+        timer_ghost += 1
+    else:
+        timer_ghost = 0
 pg.quit()
