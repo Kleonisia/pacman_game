@@ -21,7 +21,7 @@ timer = pg.time.Clock()
 fps = 60
 font = pg.font.Font('freesansbold.ttf', 20)
 score = 0
-powerup, power_counter, eaten_ghosts = False, 0, [False, False, False, False]
+powerup, power_counter = False, 0
 
 # Player, надо создать класс
 player_images = []
@@ -38,7 +38,13 @@ turns_allowed = [False, False, False, False]  # R, L, U, D
 for i in range(1, 5):
     player_images.append(pg.transform.scale(pg.image.load(f'objects/player_images/{i}.xcf'), (30, 30)))
 
+def game_win():
+    print("You win!")
+    global running
+    running = False
+
 def game_over():
+    print("Game Over")
     global running
     running = False
 
@@ -681,7 +687,7 @@ class Ghost:
                     self.i_y -= 1
                 elif self.turns[1]:
                     self.direction = 1
-                    self.i_x += 1
+                    self.i_x -= 1
                 elif self.turns[0]:
                     self.direction = 0
                     self.i_x += 1
@@ -731,7 +737,7 @@ class Ghost:
                     self.i_y += 1
                 elif self.turns[1]:
                     self.direction = 1
-                    self.i_x += 1
+                    self.i_x -= 1
                 elif self.turns[0]:
                     self.direction = 0
                     self.i_x += 1
@@ -879,8 +885,8 @@ class Ghost:
                     self.i_x -= 1
         else:
             self.dead = True
+            global eaten_ghosts, score
             eaten_ghosts[self.id] = True
-            global score
             score += 100
 
     def dead_move(self):
@@ -1323,6 +1329,7 @@ clyde_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/clyde.xcf')
 spooked_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/powerup.xcf'), (30, 30))
 dead_ghost_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/dead.png'), (30, 30))
 target = [(player_i_x, player_i_y), (player_i_x, player_i_y), (player_i_x, player_i_y), (player_i_x, player_i_y)]
+eaten_ghosts = [False * 4]
 
 
 blinky = Ghost(blinky_i_x, blinky_i_y, ghost_speed, blinky_img, 0, False, 0, target[0])
@@ -1413,7 +1420,13 @@ def move(d, i_x, i_y, f, turns):
     return i_x, i_y
 
 
-def count(a, i_x, i_y, p_c, e_g, power): #e_g = eaten_ghosts, p_c = power_counter
+def count(a, i_x, i_y, p_c, power, e_g): #e_g = eaten_ghosts, p_c = power_counter
+    b = 0
+    for i in range(33):
+        b += (level[i].count(1) + level[i].count(2))
+    if (b == 0):
+        game_win()
+        return a, p_c, power, e_g
     if level[i_y][i_x] == 1:
         a += 10
         level[i_y][i_x] = 0
@@ -1421,13 +1434,13 @@ def count(a, i_x, i_y, p_c, e_g, power): #e_g = eaten_ghosts, p_c = power_counte
         a += 50
         level[i_y][i_x] = 0
         power = True
-        p_c, e_g = 0, [False, False, False, False]
+        p_c = 0
         blinky.img = spooked_img
         pinky.img = spooked_img
         inky.img = spooked_img
         clyde.img = spooked_img
         # do ghost eatable
-    return a, p_c, e_g, power
+    return a, p_c, power, e_g
 
 
 def draw_misc():
@@ -1438,42 +1451,48 @@ def draw_misc():
     lives_text = font.render(f'LIVES: {lives}', True, 'red')
     screen.blit(lives_text, (300, 825))
 
+def ghosts_move():
+    if blinky.img == blinky_img:
+        if powerup and not eaten_ghosts[0]: # powerup - True and eaten_ghosts[0] - False
+            blinky.img = spooked_img
+            blinky.reverse_move()
+        elif not powerup: # powerup - False
+            eaten_ghosts[0] = False
+            blinky.move()
+        else:
+            blinky.img = blinky_img
+            blinky.move()
+    elif blinky.img == spooked_img:
+        if not powerup: # powerup - False
+            blinky.img = blinky_img
+            blinky.move()
+        if blinky.dead:
+            blinky.img = dead_ghost_img
+            blinky.dead_move()
+        else:
+            blinky.reverse_move()
+    else:
+        if not powerup: # powerup - False
+            eaten_ghosts[0] = False
+        if not blinky.dead: #dead - False
+            blinky.img = blinky_img
+            blinky.move()
+        else:
+            blinky.dead_move()
+
 
 running = True
 while running:
     player_x, player_y = player_i_x * square_x, player_i_y * square_y
     # print(counter)
     timer.tick(fps)
+    if powerup and power_counter < 600:
+        power_counter += 1
+    elif powerup and power_counter >= 600:
+        powerup, power_counter = False, 0
+        eaten_ghosts = [False * 4]
 
-    if powerup:
-        if blinky.dead:
-            blinky.img = dead_ghost_img
-            blinky.dead_move()
-        elif not eaten_ghosts[0]:
-            blinky.reverse_move()
-        else:
-            blinky.img = blinky_img
-            blinky.move()
-        if power_counter < 600:
-            power_counter += 1
-        else:
-            powerup = False
-            power_counter = 0
-            if not eaten_ghosts[0]:
-                blinky.img = blinky_img
-            if not eaten_ghosts[1]:
-                pinky.img = pinky_img
-            if not eaten_ghosts[2]:
-                inky.img = inky_img
-            if not eaten_ghosts[3]:
-                clyde.img = clyde_img
-    else:
-        if blinky.dead:
-            blinky.img = dead_ghost_img
-            blinky.dead_move()
-        else:
-            blinky.img = blinky_img
-            blinky.move()
+    ghosts_move()
 
     # if blinky.dead:
     #     blinky.img = dead_ghost_img
@@ -1507,8 +1526,7 @@ while running:
     clyde.draw()
     player_i_x, player_i_y, turns_allowed = check_position(player_i_x, player_i_y)
     player_i_x, player_i_y = move(direction, player_i_x, player_i_y, movement, turns_allowed)
-    score, power_counter, eaten_ghosts, powerup = count(score, player_i_x, player_i_y, power_counter,
-                                                        eaten_ghosts, powerup)
+    score, power_counter, powerup, eaten_ghosts = count(score, player_i_x, player_i_y, power_counter, powerup, eaten_ghosts)
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
