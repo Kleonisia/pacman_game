@@ -1,5 +1,5 @@
 from consts import *
-from independent_variables import timer_pacman, counter, level
+# timer_pacman, level, counter
 
 class Player:
     def __init__(self, i_x, i_y, speed, img, direction, movement, turns, lives):
@@ -12,8 +12,8 @@ class Player:
         self.turns = turns
         self.lives = lives
 
-    def move(self):
-        self.check_position()
+    def move(self, timer_pacman, level):
+        self.check_position(level)
         if timer_pacman != 0:
             return
         if not self.movement:
@@ -32,14 +32,17 @@ class Player:
                 if self.turns[3]:
                     self.i_y += 1
 
-    def check_position(self):
+    def check_position(self, level):
         self.turns = [False, False, False, False]
         # print(i_x, i_y, sep=' ')
         if self.i_x == 29 and self.i_y == 15:
             self.turns[0] = True
-        if self.i_x == 0 and self.i_y == 15:
+            self.i_x, self.i_y = 1, 15
+            return
+        elif self.i_x == 0 and self.i_y == 15:
             self.turns[1] = True
             self.i_x, self.i_y = 28, 15
+            return
         if level[self.i_y][self.i_x + 1] < 3:
             self.turns[0] = True
         if level[self.i_y][self.i_x - 1] < 3:
@@ -50,7 +53,7 @@ class Player:
             self.turns[3] = True
         # print(*turns)
 
-    def draw(self):
+    def draw(self, counter):
         player_x, player_y = self.i_x * square_x, self.i_y * square_y
         match self.direction:
             case 0:  # Right
@@ -68,4 +71,3 @@ class Player:
         self.movement = False
         self.lives -= 1
 
-pacman = Player(player_i_x, player_i_y, pacman_speed, player_images, 0, movement, turns_allowed, lives)

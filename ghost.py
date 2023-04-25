@@ -1,8 +1,8 @@
-from independent_variables import *
-from functions import game_over
-from player import *
+from functions import *
+from consts import *
+# timer_ghost, level
 class Ghost:
-    def __init__(self, i_x, i_y, speed, img, direction, dead, id, target):
+    def __init__(self, i_x, i_y, speed, img, direction, dead, id, target, pacman, level):
         self.i_x = i_x
         self.i_y = i_y
         self.speed = speed
@@ -11,16 +11,18 @@ class Ghost:
         self.dead = dead
         self.id = id
         self.target = target
+        self.pac = pacman
         self.draw()
-        self.check_pos()
+        self.check_pos(level)
     def draw(self):
         screen.blit(self.img, (self.i_x * square_x, self.i_y * square_y))
-    def move(self):
+    def move(self, timer_ghost, level, score):
+        res = True
         if timer_ghost != 0:
-            return
-        self.target = (pacman.i_x, pacman.i_y)
+            return res
         # print(f'Player: {player_i_x} {player_i_y}')
-        self.check_pos()
+        self.target = (self.pac.i_x, self.pac.i_y)
+        self.check_pos(level)
         if self.target[0] > self.i_x and self.target[1] < self.i_y: # 1
             # print('1')
             if self.direction == 0:
@@ -419,17 +421,16 @@ class Ghost:
                     self.direction = 1
                     self.i_x -= 1
         else:
-            if pacman.lives == 0:
-                game_over()
-                return
+            if self.pac.lives == 0:
+                res = game_over(score)
             self.reset()
-            pacman.reset()
-
-    def reverse_move(self):
+            self.pac.reset()
+        return res
+    def reverse_move(self, timer_ghost, level, score, eaten_ghosts):
         if timer_ghost != 0:
-            return
-        self.target = (pacman.i_x, pacman.i_y)
-        self.check_pos()
+            return score, eaten_ghosts
+        self.target = (self.pac.i_x, self.pac.i_y)
+        self.check_pos(level)
         if self.target[0] > self.i_x and self.target[1] < self.i_y:
             if self.direction == 1:
                 if self.turns[1]:
@@ -830,16 +831,17 @@ class Ghost:
                     self.i_x -= 1
         else:
             self.dead = True
-            global eaten_ghosts, score
+            # исправить
             eaten_ghosts[self.id] = True
             score += 100
+        return score, eaten_ghosts
 
-    def dead_move(self):
+    def dead_move(self, timer_ghost, level):
         if timer_ghost != 0:
             return
         self.target = (blinky_i_x, blinky_i_y)
         # print(f'Player: {player_i_x} {player_i_y}')
-        self.check_pos()
+        self.check_pos(level)
         if self.target[0] > self.i_x and self.target[1] < self.i_y: # 1
             # print('1')
             if self.direction == 0:
@@ -1240,7 +1242,7 @@ class Ghost:
         else:
             self.dead = False
 
-    def check_pos(self):
+    def check_pos(self, level):
         self.turns = [False, False, False, False]
         # print(f'blinky: {self.i_x} {self.i_y}')
         if self.i_x == 29 and self.i_y == 15:

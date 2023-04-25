@@ -1,14 +1,12 @@
-from independent_variables import *
+# score
 
-def game_win():
+def game_win(score):
     print("You win!")
     print(f'Your score: {score}')
-    global running
-    running = False
+    return False
 
-def game_over():
+
+def game_over(score):
     print("Game Over")
     print(f'Your score: {score}')
-    global running
-    running = False
-    # print(f'runnggging: {running}')
+    return False

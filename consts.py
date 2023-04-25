@@ -1,8 +1,8 @@
 import pygame as pg
-import math
+from math import pi
 
 
-PI = math.pi
+PI = pi
 
 # specifications 1
 WIDTH = 800
@@ -13,10 +13,10 @@ fps = 60
 
 screen = pg.display.set_mode([WIDTH, HEIGHT])
 
-#Player consts
+# Player consts
 player_images = []
 player_i_x, player_i_y = 15, 24
-player_x, player_y = player_i_x * square_x, player_i_y * square_y  # переписать в класс Player
+player_x, player_y = player_i_x * square_x, player_i_y * square_y
 direction = 0
 pacman_speed = 5
 lives = 3

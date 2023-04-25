@@ -1,6 +1,8 @@
-from ghost import *
-from independent_variables import *
-from functions import *
+from ghost import Ghost
+from player import Player
+from board import boards
+from functions import game_win
+from consts import *
 
 pg.init()
 
@@ -9,12 +11,20 @@ pg.display.set_caption("pacman")
 # pygame.display.init
 timer = pg.time.Clock()
 font = pg.font.Font('freesansbold.ttf', 20)
+running = True
+
+score = 0
+powerup, power_counter = False, 0
+counter = 0
+timer_ghost, timer_pacman = 0, 0
+level = boards
+eaten_ghosts = [False, False, False, False]
 
 pacman = Player(player_i_x, player_i_y, pacman_speed, player_images, 0, movement, turns_allowed, lives)
 
-blinky = Ghost(blinky_i_x, blinky_i_y, ghost_speed, blinky_img, 0, False, 0, target[0])
-pinky = Ghost(pinky_i_x, pinky_i_y, ghost_speed, pinky_img, 2, False, 1, target[1])
-clyde = Ghost(clyde_i_x, clyde_i_y, ghost_speed, clyde_img, 2, False, 2, target[2])
+blinky = Ghost(blinky_i_x, blinky_i_y, ghost_speed, blinky_img, 0, False, 0, target[0], pacman, level)
+pinky = Ghost(pinky_i_x, pinky_i_y, ghost_speed, pinky_img, 2, False, 1, target[1], pacman, level)
+clyde = Ghost(clyde_i_x, clyde_i_y, ghost_speed, clyde_img, 2, False, 2, target[2], pacman, level)
 
 def draw_board(lvl):
     num1, num2 = square_y, square_x
@@ -45,11 +55,12 @@ def draw_board(lvl):
                                  ((j + 1) * num2, (i + 0.5) * num1), 3)
 
 def count(a, i_x, i_y, p_c, power, e_g): #e_g = eaten_ghosts, p_c = power_counter
+    global running
     b = 0
     for i in range(33):
         b += (level[i].count(1) + level[i].count(2))
     if (b == 0):
-        game_win()
+        running = game_win(score)
         return a, p_c, power, e_g
     if level[i_y][i_x] == 1:
         a += 10
@@ -75,71 +86,51 @@ def draw_misc():
     screen.blit(lives_text, (300, 825))
 
 def ghosts_move():
+    global running
     if blinky.img == blinky_img:
         if powerup and not eaten_ghosts[0]: # powerup - True and eaten_ghosts[0] - False
             blinky.img = spooked_img
-            blinky.reverse_move()
+            blinky.reverse_move(timer_ghost, level, score, eaten_ghosts)
         elif not powerup: # powerup - False
             eaten_ghosts[0] = False
-            blinky.move()
+            running = blinky.move(timer_ghost, level, score)
+            # print(f'ch: {running}, {score}, {timer_ghost}')
         else:
-            blinky.img = blinky_img
-            blinky.move()
+            running = blinky.move(timer_ghost, level, score)
     elif blinky.img == spooked_img:
         if not powerup: # powerup - False
             blinky.img = blinky_img
-            blinky.move()
+            running = blinky.move(timer_ghost, level, score)
         if blinky.dead:
             blinky.img = dead_ghost_img
-            blinky.dead_move()
+            blinky.dead_move(timer_ghost, level)
         else:
-            blinky.reverse_move()
+            blinky.reverse_move(timer_ghost, level, score, eaten_ghosts)
     else:
         if not powerup: # powerup - False
             eaten_ghosts[0] = False
         if not blinky.dead: #dead - False
             blinky.img = blinky_img
-            blinky.move()
+            running = blinky.move(timer_ghost, level, score)
         else:
-            blinky.dead_move()
-
+            blinky.dead_move(timer_ghost, level)
 
 while running:
-    # print(f'running: {running}')
     # print(pacman.turns[1])
-
     player_x, player_y = player_i_x * square_x, player_i_y * square_y
-    # print(counter)
+    blinky.pac = pacman
+    pinky.pac = pacman
+    clyde.pac = pacman
     timer.tick(fps)
     if powerup and power_counter < 600:
         power_counter += 1
     elif powerup and power_counter >= 600:
         powerup, power_counter = False, 0
         eaten_ghosts = [False, False, False, False]
-
+    # print(f'check1: {running}')
     ghosts_move()
-
-    # if blinky.dead:
-    #     blinky.img = dead_ghost_img
-    #     blinky.dead_move()
-    # elif powerup:
-    #     if not eaten_ghosts[0]:
-    #         blinky.reverse_move()
-    #     else:
-    #         blinky.img = blinky_img
-    #         blinky.move()
-    # else:
-    #     blinky.img = blinky_img
-    #     blinky.move()
-    # if powerup and power_counter < 600:
-    #     power_counter += 1
-    # elif powerup and power_counter >= 600:
-    #     powerup, power_counter, eaten_ghosts = False, 0, [False, False, False, False]
-    #     blinky.img = blinky_img
-    #     pinky.img = pinky_img
-    #     inky.img = inky_img
-    #     clyde.img = clyde_img
-
+    # print(f'check2: {running}')
+    pacman = blinky.pac
 
     screen.fill('black')
     draw_board(level)
@@ -147,10 +138,14 @@ while running:
     blinky.draw()
     pinky.draw()
     clyde.draw()
+    # print(f'check3: {running}')
 
-    pacman.draw()
-    pacman.move()
+    pacman.draw(counter)
+    # print(f'check4: {running}')
+    pacman.move(timer_pacman, level)
+    # print(f'check5: {running}')
     score, power_counter, powerup, eaten_ghosts = count(score, pacman.i_x, pacman.i_y, power_counter, powerup, eaten_ghosts)
+    # print(f'check6: {running}')
     for event in pg.event.get():
         if event.type == pg.QUIT:
             running = False
