@@ -28,8 +28,8 @@ for i in range(1, 5):
 # const Ghosts
 ghost_speed = 9
 blinky_i_x, blinky_i_y = 14, 12
-pinky_i_x, pinky_i_y = 14, 15
-clyde_i_x, clyde_i_y = 16, 15
+pinky_i_x, pinky_i_y = 2, 2
+clyde_i_x, clyde_i_y = 27, 30
 blinky_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/blinky.png'), (30, 30))
 pinky_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/pinky.xcf'), (30, 30))
 clyde_img = pg.transform.scale(pg.image.load(f'objects/ghosts_images/clyde.xcf'), (30, 30))

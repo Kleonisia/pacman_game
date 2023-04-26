@@ -17,9 +17,10 @@ class Ghost:
     def draw(self):
         screen.blit(self.img, (self.i_x * square_x, self.i_y * square_y))
     def move(self, timer_ghost, level, score):
-        res = True
+        res1 = True
+        res2 = False
         if timer_ghost != 0:
-            return res
+            return res1, res2
         # print(f'Player: {player_i_x} {player_i_y}')
         self.target = (self.pac.i_x, self.pac.i_y)
         self.check_pos(level)
@@ -73,6 +74,15 @@ class Ghost:
                 else:
                     self.direction = 0
                     self.i_x += 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[0] < self.i_x and self.target[1] < self.i_y: # 2
             # print('2')
             if self.direction == 1:
@@ -124,6 +134,15 @@ class Ghost:
                 else:
                     self.direction = 1
                     self.i_x -= 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[0] < self.i_x and self.target[1] > self.i_y: # 3
             # print('3')
             if self.direction == 1:
@@ -174,6 +193,15 @@ class Ghost:
                 else:
                     self.direction = 1
                     self.i_x -= 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[0] > self.i_x and self.target[1] > self.i_y: # 4
             # print('4')
             if self.direction == 0:
@@ -224,6 +252,15 @@ class Ghost:
                 else:
                     self.direction = 0
                     self.i_x += 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[0] == self.i_x and self.target[1] > self.i_y:
             if self.direction == 3:
                 if self.turns[3]:
@@ -273,6 +310,15 @@ class Ghost:
                 else:
                     self.direction = 3
                     self.i_y += 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[0] == self.i_x and self.target[1] < self.i_y:
             if self.direction == 2:
                 if self.turns[2]:
@@ -322,6 +368,15 @@ class Ghost:
                 else:
                     self.direction = 2
                     self.i_y -= 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[1] == self.i_y and self.target[0] > self.i_x:
             if self.direction == 0:
                 if self.turns[0]:
@@ -371,6 +426,15 @@ class Ghost:
                 else:
                     self.direction = 0
                     self.i_x += 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         elif self.target[1] == self.i_y and self.target[0] < self.i_x:
             if self.direction == 1:
                 if self.turns[1]:
@@ -420,12 +484,21 @@ class Ghost:
                 else:
                     self.direction = 1
                     self.i_x -= 1
+            if self.id == 0:
+                self.Blinky_i_x = self.i_x
+                self.Blinky_i_y = self.i_y
+            elif self.id == 1:
+                self.Pinky_i_x = self.i_x
+                self.Pinky_i_y = self.i_y
+            else:
+                self.Clyde_i_x = self.i_x
+                self.Clyde_i_y = self.i_y
         else:
-            if self.pac.lives == 0:
-                res = game_over(score)
-            self.reset()
+            res2 = True
+            if self.pac.lives <= 0:
+                res1 = game_over(score)
             self.pac.reset()
-        return res
+        return res1, res2
     def reverse_move(self, timer_ghost, level, score, eaten_ghosts):
         if timer_ghost != 0:
             return score, eaten_ghosts
@@ -1268,6 +1341,6 @@ class Ghost:
             self.i_x, self.i_y = blinky_i_x, blinky_i_y
         elif self.id == 1:
             self.i_x, self.i_y = pinky_i_x, pinky_i_y
-        elif self.id == 2:
+        else:
             self.i_x, self.i_y = clyde_i_x, clyde_i_y
 

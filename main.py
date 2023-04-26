@@ -18,13 +18,13 @@ powerup, power_counter = False, 0
 counter = 0
 timer_ghost, timer_pacman = 0, 0
 level = boards
-eaten_ghosts = [False, False, False, False]
+eaten_ghosts = [False, False, False]
 
 pacman = Player(player_i_x, player_i_y, pacman_speed, player_images, 0, movement, turns_allowed, lives)
 
 blinky = Ghost(blinky_i_x, blinky_i_y, ghost_speed, blinky_img, 0, False, 0, target[0], pacman, level)
-pinky = Ghost(pinky_i_x, pinky_i_y, ghost_speed, pinky_img, 2, False, 1, target[1], pacman, level)
-clyde = Ghost(clyde_i_x, clyde_i_y, ghost_speed, clyde_img, 2, False, 2, target[2], pacman, level)
+pinky = Ghost(pinky_i_x, pinky_i_y, ghost_speed, pinky_img, 3, False, 1, target[1], pacman, level)
+clyde = Ghost(clyde_i_x, clyde_i_y, ghost_speed, clyde_img, 1, False, 2, target[2], pacman, level)
 
 def draw_board(lvl):
     num1, num2 = square_y, square_x
@@ -86,6 +86,8 @@ def draw_misc():
     screen.blit(lives_text, (300, 825))
 
 def ghosts_move():
+    reboot = [False, False, False]
+    run = [True, True, True]
     global running
     if blinky.img == blinky_img:
         if powerup and not eaten_ghosts[0]: # powerup - True and eaten_ghosts[0] - False
@@ -93,14 +95,14 @@ def ghosts_move():
             blinky.reverse_move(timer_ghost, level, score, eaten_ghosts)
         elif not powerup: # powerup - False
             eaten_ghosts[0] = False
-            running = blinky.move(timer_ghost, level, score)
+            run[0], reboot[0] = blinky.move(timer_ghost, level, score)
             # print(f'ch: {running}, {score}, {timer_ghost}')
         else:
             running = blinky.move(timer_ghost, level, score)
     elif blinky.img == spooked_img:
         if not powerup: # powerup - False
             blinky.img = blinky_img
-            running = blinky.move(timer_ghost, level, score)
+            run[0], reboot[0] = blinky.move(timer_ghost, level, score)
         if blinky.dead:
             blinky.img = dead_ghost_img
             blinky.dead_move(timer_ghost, level)
@@ -111,9 +113,69 @@ def ghosts_move():
             eaten_ghosts[0] = False
         if not blinky.dead: #dead - False
             blinky.img = blinky_img
-            running = blinky.move(timer_ghost, level, score)
+            run[0], reboot[0] = blinky.move(timer_ghost, level, score)
         else:
             blinky.dead_move(timer_ghost, level)
+    if pinky.img == pinky_img:
+        if powerup and not eaten_ghosts[0]: # powerup - True and eaten_ghosts[0] - False
+            pinky.img = spooked_img
+            pinky.reverse_move(timer_ghost, level, score, eaten_ghosts)
+        elif not powerup: # powerup - False
+            eaten_ghosts[1] = False
+            run[1], reboot[1] = pinky.move(timer_ghost, level, score)
+            # print(f'ch: {running}, {score}, {timer_ghost}')
+        else:
+            run[1], reboot[1] = pinky.move(timer_ghost, level, score)
+    elif pinky.img == spooked_img:
+        if not powerup: # powerup - False
+            pinky.img = pinky_img
+            run[1], reboot[1] = pinky.move(timer_ghost, level, score)
+        if pinky.dead:
+            pinky.img = dead_ghost_img
+            pinky.dead_move(timer_ghost, level)
+        else:
+            pinky.reverse_move(timer_ghost, level, score, eaten_ghosts)
+    else:
+        if not powerup: # powerup - False
+            eaten_ghosts[1] = False
+        if not pinky.dead: #dead - False
+            pinky.img = pinky_img
+            run[1], reboot[1] = pinky.move(timer_ghost, level, score)
+        else:
+            pinky.dead_move(timer_ghost, level)
+    if clyde.img == clyde_img:
+        if powerup and not eaten_ghosts[0]: # powerup - True and eaten_ghosts[0] - False
+            clyde.img = spooked_img
+            clyde.reverse_move(timer_ghost, level, score, eaten_ghosts)
+        elif not powerup: # powerup - False
+            eaten_ghosts[2] = False
+            run[2], reboot[2] = clyde.move(timer_ghost, level, score)
+            # print(f'ch: {running}, {score}, {timer_ghost}')
+        else:
+            run[2], reboot[2] = clyde.move(timer_ghost, level, score)
+    elif clyde.img == spooked_img:
+        if not powerup: # powerup - False
+            clyde.img = clyde_img
+            run[2], reboot[2] = clyde.move(timer_ghost, level, score)
+        if clyde.dead:
+            clyde.img = dead_ghost_img
+            clyde.dead_move(timer_ghost, level)
+        else:
+            clyde.reverse_move(timer_ghost, level, score, eaten_ghosts)
+    else:
+        if not powerup: # powerup - False
+            eaten_ghosts[2] = False
+        if not clyde.dead: #dead - False
+            clyde.img = clyde_img
+            run[2], reboot[2] = clyde.move(timer_ghost, level, score)
+        else:
+            clyde.dead_move(timer_ghost, level)
+    if reboot[0] or reboot[1] or reboot[2]:
+        pinky.reset()
+        blinky.reset()
+        clyde.reset()
+    if not (run[0] and run[1] and run[2]):
+        running = False
 
 while running:
     # print(pacman.turns[1])
