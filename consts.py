@@ -9,7 +9,7 @@ WIDTH = 800
 HEIGHT = 850
 square_x = (WIDTH // 30)
 square_y = ((HEIGHT - 50) // 32)  # boards[??]
-fps = 60
+fps = 90
 
 screen = pg.display.set_mode([WIDTH, HEIGHT])
 

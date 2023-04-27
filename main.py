@@ -1,7 +1,7 @@
 from ghost import Ghost
 from player import Player
 from board import boards
-from functions import game_win
+from functions import game_win, game_over
 from consts import *
 
 pg.init()
@@ -176,6 +176,17 @@ def ghosts_move():
         clyde.reset()
     if not (run[0] and run[1] and run[2]):
         running = False
+def check_collisions():
+    global running
+    if (pacman.i_x == blinky.i_x and pacman.i_y == blinky.i_y and blinky.img == blinky_img)\
+            or (pacman.i_x == pinky.i_x and pacman.i_y == pinky.i_y and pinky.img == pinky_img)\
+            or (pacman.i_x == clyde.i_x and pacman.i_y == clyde.i_y and clyde.img == clyde_img):
+        if (pacman.lives == 0):
+            running = game_over(score)
+        pacman.reset()
+        blinky.reset()
+        pinky.reset()
+        clyde.reset()
 
 while running:
     # print(pacman.turns[1])
@@ -206,6 +217,7 @@ while running:
     # print(f'check4: {running}')
     pacman.move(timer_pacman, level)
     # print(f'check5: {running}')
+    check_collisions()
     score, power_counter, powerup, eaten_ghosts = count(score, pacman.i_x, pacman.i_y, power_counter, powerup, eaten_ghosts)
     # print(f'check6: {running}')
     for event in pg.event.get():
